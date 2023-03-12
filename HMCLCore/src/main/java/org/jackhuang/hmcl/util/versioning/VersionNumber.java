@@ -329,6 +329,10 @@ public class VersionNumber implements Comparable<VersionNumber> {
         return buf.chars().allMatch(Character::isDigit) ? new IntegerItem(buf) : new StringItem(buf);
     }
 
+    public int compareTo(String o) {
+        return compareTo(VersionNumber.asVersion(o));
+    }
+
     @Override
     public int compareTo(VersionNumber o) {
         return items.compareTo(o.items);
@@ -341,6 +345,14 @@ public class VersionNumber implements Comparable<VersionNumber> {
 
     public String getCanonical() {
         return canonical;
+    }
+
+    public VersionNumber min(VersionNumber that) {
+        return this.compareTo(that) <= 0 ? this : that;
+    }
+
+    public VersionNumber max(VersionNumber that) {
+        return this.compareTo(that) >= 0 ? this : that;
     }
 
     @Override

@@ -48,7 +48,7 @@ public class DownloadSettingsPage extends StackPane {
         content.setPadding(new Insets(10));
         content.setFillWidth(true);
         ScrollPane scrollPane = new ScrollPane(content);
-        JFXScrollPane.smoothScrolling(scrollPane);
+        FXUtils.smoothScrolling(scrollPane);
         scrollPane.setFitToWidth(true);
         getChildren().setAll(scrollPane);
 
@@ -214,7 +214,6 @@ public class DownloadSettingsPage extends StackPane {
                         GridPane.setColumnIndex(txtProxyHost, 1);
                         gridPane.getChildren().add(txtProxyHost);
                         FXUtils.bindString(txtProxyHost, config().proxyHostProperty());
-                        txtProxyHost.getValidators().setAll(new NumberValidator(i18n("input.number"), false));
                     }
 
                     {

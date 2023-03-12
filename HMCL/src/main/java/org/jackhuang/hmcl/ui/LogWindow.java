@@ -26,6 +26,7 @@ import javafx.beans.InvalidationListener;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.*;
 import javafx.beans.value.ChangeListener;
+import javafx.collections.FXCollections;
 import javafx.css.PseudoClass;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -34,8 +35,11 @@ import javafx.scene.control.Label;
 import javafx.scene.control.*;
 import javafx.scene.layout.*;
 import javafx.stage.Stage;
-import org.apache.commons.lang3.mutable.MutableObject;
 import org.jackhuang.hmcl.game.LauncherHelper;
+import org.jackhuang.hmcl.setting.Theme;
+import org.jackhuang.hmcl.util.Holder;
+import org.jackhuang.hmcl.util.CircularArrayList;
+import org.jackhuang.hmcl.util.Lang;
 import org.jackhuang.hmcl.util.Log4jLevel;
 import org.jackhuang.hmcl.util.platform.OperatingSystem;
 
@@ -86,8 +90,8 @@ public final class LogWindow extends Stage {
     private boolean stopCheckLogCount = false;
 
     public LogWindow() {
-        setScene(new Scene(impl, 800, 480));
-        getScene().getStylesheets().addAll(config().getTheme().getStylesheets(config().getLauncherFontFamily()));
+        setScene(new Scene(impl, 854, 480));
+        getScene().getStylesheets().addAll(Theme.getTheme().getStylesheets(config().getLauncherFontFamily()));
         setTitle(i18n("logwindow.title"));
         getIcons().add(newImage("/assets/img/icon.png"));
 
@@ -132,7 +136,6 @@ public final class LogWindow extends Stage {
         while (logs.size() > config().getLogLines()) {
             Log removedLog = logs.removeFirst();
             if (!impl.listView.getItems().isEmpty() && impl.listView.getItems().get(0) == removedLog) {
-                // TODO: fix O(n)
                 impl.listView.getItems().remove(0);
             }
         }
@@ -160,8 +163,10 @@ public final class LogWindow extends Stage {
         LogWindowImpl() {
             getStyleClass().add("log-window");
 
+            listView.setItems(FXCollections.observableList(new CircularArrayList<>(config().getLogLines() + 1)));
+
             boolean flag = false;
-            cboLines.getItems().setAll("500", "2000", "5000");
+            cboLines.getItems().setAll("10000", "5000", "2000", "500");
             for (String i : cboLines.getItems())
                 if (Integer.toString(config().getLogLines()).equals(i)) {
                     cboLines.getSelectionModel().select(i);
@@ -286,8 +291,10 @@ public final class LogWindow extends Stage {
                     if (!listView.getItems().isEmpty() && control.autoScroll.get())
                         listView.scrollTo(listView.getItems().size() - 1);
                 });
-                listView.setStyle("-fx-font-family: " + config().getFontFamily() + "; -fx-font-size: " + config().getFontSize() + "px;");
-                MutableObject<Object> lastCell = new MutableObject<>();
+
+                listView.setStyle("-fx-font-family: " + Lang.requireNonNullElse(config().getFontFamily(), FXUtils.DEFAULT_MONOSPACE_FONT)
+                        + "; -fx-font-size: " + config().getFontSize() + "px;");
+                Holder<Object> lastCell = new Holder<>();
                 listView.setCellFactory(x -> new ListCell<Log>() {
                     {
                         getStyleClass().add("log-window-list-cell");
@@ -306,9 +313,9 @@ public final class LogWindow extends Stage {
                         super.updateItem(item, empty);
 
                         // https://mail.openjdk.org/pipermail/openjfx-dev/2022-July/034764.html
-                        if (this == lastCell.getValue() && !isVisible())
+                        if (this == lastCell.value && !isVisible())
                             return;
-                        lastCell.setValue(this);
+                        lastCell.value = this;
 
                         pseudoClassStateChanged(EMPTY, empty);
                         pseudoClassStateChanged(FATAL, !empty && item.level == Log4jLevel.FATAL);

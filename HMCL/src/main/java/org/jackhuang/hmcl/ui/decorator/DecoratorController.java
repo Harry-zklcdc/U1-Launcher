@@ -52,6 +52,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 import java.util.Random;
 import java.util.logging.Level;
@@ -163,10 +164,10 @@ public class DecoratorController {
                         config().backgroundImageUrlProperty()));
     }
 
-    private final Image defaultBackground = newImage("/assets/img/background.gif");
+    private Image defaultBackground;
 
     /**
-     * Load background image from bg/, background.png, background.jpg
+     * Load background image from bg/, background.png, background.jpg, background.gif
      */
     private Image loadDefaultBackgroundImage() {
         Optional<Image> image = randomImageIn(Paths.get("bg"));
@@ -176,7 +177,15 @@ public class DecoratorController {
         if (!image.isPresent()) {
             image = tryLoadImage(Paths.get("background.jpg"));
         }
-        return image.orElse(defaultBackground);
+        if (!image.isPresent()) {
+            image = tryLoadImage(Paths.get("background.gif"));
+        }
+
+        return image.orElseGet(() -> {
+            if (defaultBackground == null)
+                defaultBackground = newImage("/assets/img/background.gif");
+            return defaultBackground;
+        });
     }
 
     private Optional<Image> randomImageIn(Path imageDir) {
@@ -189,8 +198,8 @@ public class DecoratorController {
             candidates = stream
                 .filter(Files::isReadable)
                     .filter(it -> {
-                        String ext = getExtension(it).toLowerCase();
-                        return ext.equals("png") || ext.equals("jpg");
+                        String ext = getExtension(it).toLowerCase(Locale.ROOT);
+                        return ext.equals("png") || ext.equals("jpg") || ext.equals("gif");
                     })
                     .collect(toList());
         } catch (IOException e) {

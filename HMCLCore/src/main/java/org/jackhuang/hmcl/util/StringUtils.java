@@ -20,10 +20,7 @@ package org.jackhuang.hmcl.util;
 import org.jackhuang.hmcl.util.platform.OperatingSystem;
 
 import java.io.*;
-import java.nio.charset.CharsetEncoder;
-import java.nio.charset.StandardCharsets;
 import java.util.*;
-import java.util.regex.Pattern;
 
 /**
  *
@@ -158,11 +155,19 @@ public final class StringUtils {
             return str + suffix;
     }
 
+    public static String removePrefix(String str, String prefix) {
+        return str.startsWith(prefix) ? str.substring(prefix.length()) : str;
+    }
+
     public static String removePrefix(String str, String... prefixes) {
         for (String prefix : prefixes)
             if (str.startsWith(prefix))
                 return str.substring(prefix.length());
         return str;
+    }
+
+    public static String removeSuffix(String str, String suffix) {
+        return str.endsWith(suffix) ? str.substring(0, str.length() - suffix.length()) : str;
     }
 
     /**
@@ -176,24 +181,29 @@ public final class StringUtils {
     }
 
     public static boolean containsOne(Collection<String> patterns, String... targets) {
-        for (String pattern : patterns)
+        for (String pattern : patterns) {
+            String lowerPattern = pattern.toLowerCase(Locale.ROOT);
             for (String target : targets)
-                if (pattern.toLowerCase().contains(target.toLowerCase()))
+                if (lowerPattern.contains(target.toLowerCase(Locale.ROOT)))
                     return true;
+        }
         return false;
     }
 
     public static boolean containsOne(String pattern, String... targets) {
+        String lowerPattern = pattern.toLowerCase(Locale.ROOT);
         for (String target : targets)
-            if (pattern.toLowerCase().contains(target.toLowerCase()))
+            if (lowerPattern.contains(target.toLowerCase(Locale.ROOT)))
                 return true;
         return false;
     }
 
-    public static boolean containsOne(String pattern, char... targets) {
-        for (char target : targets)
-            if (pattern.toLowerCase().indexOf(Character.toLowerCase(target)) >= 0)
+    public static boolean containsChinese(String str) {
+        for (int i = 0; i < str.length(); i++) {
+            char ch = str.charAt(i);
+            if (ch >= '\u4e00' && ch <= '\u9fa5')
                 return true;
+        }
         return false;
     }
 
@@ -216,7 +226,10 @@ public final class StringUtils {
     }
 
     public static String parseColorEscapes(String original) {
-        return original.replaceAll("\u00A7\\d", "");
+        if (original.indexOf('\u00A7') < 0)
+            return original;
+
+        return original.replaceAll("\u00A7[0-9a-gklmnor]", "");
     }
 
     public static String parseEscapeSequence(String str) {
@@ -256,8 +269,11 @@ public final class StringUtils {
         return Optional.of(str.substring(0, halfLength) + " ... " + str.substring(str.length() - halfLength));
     }
 
-    public static boolean isASCII(CharSequence cs) {
-        return US_ASCII_ENCODER.canEncode(cs);
+    public static boolean isASCII(String cs) {
+        for (int i = 0; i < cs.length(); i++)
+            if (cs.charAt(i) >= 128)
+                return false;
+        return true;
     }
 
     public static boolean isAlphabeticOrNumber(String str) {
@@ -304,8 +320,4 @@ public final class StringUtils {
             return f[a.length()][b.length()];
         }
     }
-
-    public static final Pattern CHINESE_PATTERN = Pattern.compile("[\\u4e00-\\u9fa5]");
-
-    public static final CharsetEncoder US_ASCII_ENCODER = StandardCharsets.US_ASCII.newEncoder();
 }

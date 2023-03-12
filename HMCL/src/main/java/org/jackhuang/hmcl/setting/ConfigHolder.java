@@ -22,8 +22,8 @@ import com.google.gson.JsonParseException;
 import org.jackhuang.hmcl.Metadata;
 import org.jackhuang.hmcl.util.InvocationDispatcher;
 import org.jackhuang.hmcl.util.Lang;
-import org.jackhuang.hmcl.util.StringUtils;
 import org.jackhuang.hmcl.util.io.FileUtils;
+import org.jackhuang.hmcl.util.io.JarUtils;
 import org.jackhuang.hmcl.util.platform.OperatingSystem;
 
 import java.io.IOException;
@@ -121,9 +121,8 @@ public final class ConfigHolder {
     private static Path locateConfig() {
         Path exePath = Paths.get("").toAbsolutePath();
         try {
-            Path jarPath = Paths.get(ConfigHolder.class.getProtectionDomain().getCodeSource().getLocation()
-                    .toURI()).toAbsolutePath();
-            if (Files.isRegularFile(jarPath) && Files.isWritable(jarPath)) {
+            Path jarPath = JarUtils.thisJar().orElse(null);
+            if (jarPath != null && Files.isRegularFile(jarPath) && Files.isWritable(jarPath)) {
                 jarPath = jarPath.getParent();
                 exePath = jarPath;
 

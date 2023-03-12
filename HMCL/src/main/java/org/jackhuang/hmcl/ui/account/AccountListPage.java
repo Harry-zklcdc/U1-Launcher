@@ -18,7 +18,6 @@
 package org.jackhuang.hmcl.ui.account;
 
 import com.jfoenix.controls.JFXButton;
-import com.jfoenix.controls.JFXScrollPane;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.*;
 import javafx.beans.value.ObservableValue;
@@ -116,14 +115,6 @@ public class AccountListPage extends DecoratorAnimatedPage implements DecoratorP
                     microsoftItem.setOnAction(e -> Controllers.dialog(new CreateAccountPane(Accounts.FACTORY_MICROSOFT)));
                     boxMethods.getChildren().add(microsoftItem);
 
-                    AdvancedListItem littleSkinItem = new AdvancedListItem();
-                    littleSkinItem.getStyleClass().add("navigation-drawer-item");
-                    littleSkinItem.setActionButtonVisible(false);
-                    littleSkinItem.setTitle(i18n("account.methods.little_skin"));
-                    littleSkinItem.setLeftGraphic(wrap(SVG::server));
-                    littleSkinItem.setOnAction(e -> Controllers.dialog(new CreateAccountPane(Accounts.FACTORY_LITTLE_SKIN)));
-                    boxMethods.getChildren().add(littleSkinItem);
-
                     VBox boxAuthServers = new VBox();
                     authServerItems = MappedObservableList.create(skinnable.authServersProperty(), server -> {
                         AdvancedListItem item = new AdvancedListItem();
@@ -187,7 +178,7 @@ public class AccountListPage extends DecoratorAnimatedPage implements DecoratorP
                 Bindings.bindContent(list.getChildren(), skinnable.items);
 
                 scrollPane.setContent(list);
-                JFXScrollPane.smoothScrolling(scrollPane);
+                FXUtils.smoothScrolling(scrollPane);
 
                 setCenter(scrollPane);
             }
