@@ -273,6 +273,8 @@ public final class HiPerMultiplayerManager {
                     output.write("logging:\n");
                     output.write("  format: json\n");
                     output.write("  file_path: '" + Metadata.HMCL_DIRECTORY.resolve("logs").resolve("hiper.log").toString().replace("'", "''") + "'\n");
+                    output.write("sync:\n");
+                    output.write("  enable: false\n");
                 }
             }
 
